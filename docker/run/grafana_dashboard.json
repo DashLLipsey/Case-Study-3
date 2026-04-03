@@ -15,7 +15,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (name) (rate(container_cpu_usage_seconds_total{name=~\"cookiemancer_(frontend|backend)\"}[5m])) * 100",
+          "expr": "sum by (name) (rate(container_cpu_usage_seconds_total{name=~\"(frontend|backend)\"}[5m])) * 100",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
@@ -48,7 +48,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (name) (container_memory_working_set_bytes{name=~\"cookiemancer_(frontend|backend)\"}) / 1024 / 1024",
+          "expr": "sum by (name) (container_memory_working_set_bytes{name=~\"(frontend|backend)\"}) / 1024 / 1024",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
@@ -259,7 +259,7 @@
   "schemaVersion": 39,
   "style": "dark",
   "tags": [
-    "cookiemancer"
+    "songbird"
   ],
   "templating": {
     "list": []
@@ -269,6 +269,6 @@
     "to": "now"
   },
   "timezone": "",
-  "title": "Cookiemancer",
+  "title": "Songbird",
   "version": 1
 }
