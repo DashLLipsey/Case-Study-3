@@ -1,37 +1,58 @@
-from fastapi import FastAPI, status, HTTPException
+from fastapi import FastAPI, status, HTTPException, Response
+from typing import List, Optional
 from pydantic import BaseModel
 from huggingface_hub import InferenceClient
+import prometheus_client
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 import logging
+from time import perf_counter
 
-# load variables from .env if present (makes it easier in dev)
-env_path = Path(__file__).parent.parent / ".env"
-if env_path.exists():
-    load_dotenv(env_path)
-song_app = FastAPI()
+# prometheus metrics
+HEALTH_REQUESTS_TOTAL = prometheus_client.Counter(
+    'backend_health_requests_total',
+    'Total num of /health requests received by the backend'
+)
+SONG_REQUESTS_TOTAL = prometheus_client.Counter(
+    'backend_song_requests_total',
+    'Total number of /generate requests'
+)
+SONG_REQUEST_ERRORS_TOTAL = prometheus_client.Counter(
+    'backend_song_request_errors_total',
+    'Total number of failed /song requests'
+)
+SONG_REQUEST_DURATION_SECONDS = prometheus_client.Histogram(
+    'backend_song_request_duration_seconds',
+    'Time spent generating song responses'
+)
 
-# get hf token from env
+# song app
+song_app = FastAPI(title="Songbird API")
+
+# environment
 HF_TOKEN = os.getenv("HF_TOKEN")
-
-# warn on startup if the HF_TOKEN env variable is absent
 if HF_TOKEN is None:
-    logging.warning("HF_TOKEN is not set; remote inference requests will return an error.")
+    logging.warning("HF_TOKEN is not set.")
 else:
-    logging.info("HF_TOKEN loaded from environment")
+    logging.info("HF_TOKEN loaded.")
 
-# cache local pipeline
+@song_app.get("/health")
+def health() -> dict[str, str]:
+    HEALTH_REQUESTS_TOTAL.inc()
+    return {'status': 'ok'}
+
+# request/response models
 pipe = None
 
-class UserQuery(BaseModel):
+class GenerateRequest(BaseModel):
     prompt: str
     system_message: str
-    max_tokens: int
-    temp: float
-    top_p: float
-    use_local_model: bool
-    hf_token: str | None = None
+    max_tokens: int = 200
+    temp: float = 0.7
+    top_p: float = 0.9
+    use_local_model: bool = False
+    hf_token: Optional[str] = None
 
 # Creating example inputs and outputs for few shot learning
 EXAMPLE_INPUT_1 = 'Make me lyrics and chords for a song in the style of Simon and Garfunkel about sitting through a computer science lecture'
@@ -111,107 +132,131 @@ You just bore me
 Selling fear like 
 It's conformity 
 """
+FEW_SHOT_EXAMPLES = [
+    {
+        "input": EXAMPLE_INPUT_1,
+        "output": EXAMPLE_OUTPUT_1,
+    },
+    {
+        "input": EXAMPLE_INPUT_2,
+        "output": EXAMPLE_OUTPUT_2,
+    },
+    {
+        "input": EXAMPLE_INPUT_3,
+        "output": EXAMPLE_OUTPUT_3,
+    },
+]
 
-@song_app.get("/")
-def read_root():
-    return {"message": "Song backend running"}
+class GenerateResponse(BaseModel):
+    response: str
 
-@song_app.post("/generate", status_code=status.HTTP_200_OK)
-def generate_song(userQuery: UserQuery):
+# build prompts
+def build_messages(req: GenerateRequest) -> list[dict]:
+    messages = [
+        {"role": "system", "content": req.system_message}
+    ]
+
+    # add few shot learning examples
+    for example in FEW_SHOT_EXAMPLES:
+        messages.append({"role": "user", "content": example["input"]})
+        messages.append({"role": "assistant", "content": example["output"]})
+
+    # add user prompt
+    messages.append({"role": "user", "content": req.prompt})
+    return messages
+
+# local model
+def generate_local(messages: list[dict], req: GenerateRequest) -> str:
     global pipe
 
     try:
-        messages = [
-            {"role": "system", "content": userQuery.system_message},
-            {"role": "user", "content": EXAMPLE_INPUT_1},
-            {"role": "assistant", "content": EXAMPLE_OUTPUT_1},
-            {"role": "user", "content": EXAMPLE_INPUT_2},
-            {"role": "assistant", "content": EXAMPLE_OUTPUT_2},
-            {"role": "user", "content": EXAMPLE_INPUT_3},
-            {"role": "assistant", "content": EXAMPLE_OUTPUT_3},
-            {"role": "user", "content": userQuery.prompt}
-        ]
-
-        # local model
-        if userQuery.use_local_model:
-            try:
-                from transformers import pipeline
-                import torch
-            except Exception as e:
-                logging.error(f"Failed to import local model dependencies: {e}")
-                raise HTTPException(
-                    status_code=500,
-                    detail=(
-                        f"Local model unavailable: failed to import dependencies. "
-                        f"Error: {str(e)[:200]}"
-                    ),
-                )
-
-            try:
-                if pipe is None:
-                    pipe = pipeline(
-                        "text-generation",
-                        model="LiquidAI/LFM2-350M", 
-                    )
-            except Exception as e:
-                logging.error(f"Failed to create local pipeline: {e}")
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Could not initialize local pipeline: {str(e)[:200]}",
-                )
-
-            try:
-                prompt = messages
-                prompt= ''.join([f"{m['role']}: {m['content']}" for m in prompt])
-                outputs = pipe(
-                    prompt,
-                    max_new_tokens=userQuery.max_tokens,
-                    do_sample=True,
-                    temperature=userQuery.temp,
-                    top_p=userQuery.top_p,
-                )
-
-                # Just output the answer, remove the prompt
-                response = outputs[0]['generated_text'][len(prompt):].strip()
-                return {"response": response}
-            except Exception as e:
-                logging.error(f"Local model generation error: {e}")
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Generation failed: {str(e)[:200]}",
-                )
-
-        else:
-            # choose which token to use: explicit hf_token from request takes priority
-            token_to_use = HF_TOKEN
-            logging.debug(f"remote branch invoked; token present={token_to_use is not None}")
-            if token_to_use is None:
-                # no token available, return message without aborting connection
-                return {"response": "Huggingface token required for remote model (set HF_TOKEN env var)"}
-
-            # use huggingface client and define model
-            client = InferenceClient(token=token_to_use, model="openai/gpt-oss-20b")
-            try:
-                completion = client.chat_completion(
-                    messages,
-                    max_tokens=userQuery.max_tokens,
-                    temperature=userQuery.temp,
-                    top_p=userQuery.top_p,
-                )
-            except Exception as e:
-                # log exception and return HTTP 502
-                logging.error(f"Inference client error: {e}")
-                raise HTTPException(status_code=502, detail=f"Inference API error: {exc}")
-
-            return {"response": completion.choices[0].message.content}
-
-    except HTTPException:
-        # re-raise HTTP exceptions as-is
-        raise
+        from transformers import pipeline
     except Exception as e:
-        # catch any unexpected exceptions and return a proper error response
-        logging.error(f"Unexpected error in generate_song: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Unexpected error: {str(e)[:200]}",
+            detail=f"Local model import failed: {str(e)[:200]}",
         )
+
+    if pipe is None:
+        pipe = pipeline(
+            "text-generation",
+            model="LiquidAI/LFM2-350M",
+        )
+
+    prompt = "".join([f"{m['role']}: {m['content']}\n" for m in messages])
+
+    outputs = pipe(
+        prompt,
+        max_new_tokens=req.max_tokens,
+        do_sample=True,
+        temperature=req.temp,
+        top_p=req.top_p,
+    )
+
+    return outputs[0]["generated_text"][len(prompt):].strip()
+
+# remote model generation
+def generate_remote(messages: list[dict], req: GenerateRequest) -> str:
+    token = req.hf_token or HF_TOKEN
+
+    if token is None:
+        raise HTTPException(
+            status_code=400,
+            detail="HF token required for remote model",
+        )
+
+    client = InferenceClient(
+        token=token,
+        model="openai/gpt-oss-20b",
+    )
+
+    try:
+        completion = client.chat_completion(
+            messages,
+            max_tokens=req.max_tokens,
+            temperature=req.temp,
+            top_p=req.top_p,
+        )
+        return completion.choices[0].message.content
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Inference API error: {str(e)[:200]}",
+        )
+    
+# generation function
+def generate(req: GenerateRequest) -> str:
+    messages = build_messages(req)
+
+    if req.use_local_model:
+        return generate_local(messages, req)
+    else:
+        return generate_remote(messages, req)
+    
+@song_app.get('/health')
+def health():
+    return {"status": "ok"}
+
+@song_app.post('/generate', response_model=GenerateResponse)
+def generate_endpoint(body: GenerateRequest):
+    SONG_REQUESTS_TOTAL.inc()
+    start = perf_counter()
+
+    try:
+        song = generate(body.prompt)
+        return GenerateResponse(
+            response=song
+        )
+    except Exception as e:
+        SONG_REQUEST_ERRORS_TOTAL.inc()
+        logging.error(f"Generation error: {e}", exc_info=True)
+        raise
+    finally:
+        SONG_REQUEST_DURATION_SECONDS.observe(perf_counter() - start)
+
+@song_app.get("/metrics")
+def metrics():
+    return Response(
+        prometheus_client.generate_latest(),
+        media_type=prometheus_client.CONTENT_TYPE_LATEST,
+    )
