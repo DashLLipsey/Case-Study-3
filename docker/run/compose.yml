@@ -3,7 +3,7 @@ services:
     image: ebprihar/cookiemancer_backend:latest
     container_name: cookiemancer_backend
     ports:
-      - '22001:8000'
+      - '22031:8000'
     networks:
       - cookiemancer_net
     healthcheck:
@@ -15,15 +15,15 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: ebprihar/cookiemancer_frontend:latest
-    container_name: cookiemancer_frontend
+    image: dashllipsey/frontend:latest
+    container_name: songbird_frontend
     depends_on:
       backend:
         condition: service_healthy
     ports:
-      - '22002:7860'
+      - '22030:7860'
     networks:
-      - cookiemancer_net
+      - songbird_net
     restart: unless-stopped
 
   ngrok:
@@ -35,9 +35,9 @@ services:
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
     ports:
-    - "22003:4040"
+    - "22032:4040"
     networks:
-      - cookiemancer_net
+      - songbird_net
     restart: unless-stopped
 
   cadvisor:
@@ -50,7 +50,7 @@ services:
       - /var/lib/docker:/var/lib/docker:ro
       - /dev/disk:/dev/disk:ro
     networks:
-      - cookiemancer_net
+      - songbird_net
     restart: unless-stopped
 
   node-exporter:
@@ -65,7 +65,7 @@ services:
       - /:/host:ro
     pid: host
     networks:
-      - cookiemancer_net
+      - songbird_net
     restart: unless-stopped
 
   prometheus:
@@ -77,31 +77,31 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     ports:
-      - '22004:9090'
+      - '22033:9090'
     depends_on:
       - frontend
       - backend
       - cadvisor
       - node-exporter
     networks:
-      - cookiemancer_net
+      - songbird_net
     restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "22005:3000"
+      - "22035:3000"
     volumes:
       - grafana_data:/var/lib/grafana
     depends_on:
       - prometheus
     networks:
-      - cookiemancer_net
+      - songbird_net
     restart: unless-stopped
 
 networks:
-  cookiemancer_net:
+  songbird_net:
     driver: bridge
 
 volumes:
