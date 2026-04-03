@@ -8,9 +8,8 @@ RUN pip install --no-cache-dir fastapi uvicorn transformers accelerate bitsandby
 WORKDIR /app
 
 COPY .model /app/.model
-COPY src/llm.py /app/src/
 COPY src/backend.py /app/src/
 
 EXPOSE 8000
 
-CMD ["uvicorn", "src.backend:app", "--host", "0.0.0.0", "--port", "8000"] # MUST BE CHANGED
+CMD ["uvicorn", "src.backend:song_app", "--host", "0.0.0.0", "--port", "8000"]
