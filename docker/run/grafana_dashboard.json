@@ -1,0 +1,274 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Container CPU Usage (%)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "sum by (name) (rate(container_cpu_usage_seconds_total{name=~\"cookiemancer_(frontend|backend)\"}[5m])) * 100",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Container RAM Working Set (MiB)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (name) (container_memory_working_set_bytes{name=~\"cookiemancer_(frontend|backend)\"}) / 1024 / 1024",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decmbytes",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "type": "barchart",
+      "title": "Frontend Response Time Histogram (last 24h)",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
+          "legendFormat": "0-60s",
+          "refId": "A",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"120.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
+          "legendFormat": "60-120s",
+          "refId": "B",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"180.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"120.0\"}[24h]))",
+          "legendFormat": "120-180s",
+          "refId": "C",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"240.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"180.0\"}[24h]))",
+          "legendFormat": "180-240s",
+          "refId": "D",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"300.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"240.0\"}[24h]))",
+          "legendFormat": "240-300s",
+          "refId": "E",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"360.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"300.0\"}[24h]))",
+          "legendFormat": "300-360s",
+          "refId": "F",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"420.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"360.0\"}[24h]))",
+          "legendFormat": "360-420s",
+          "refId": "G",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"480.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"420.0\"}[24h]))",
+          "legendFormat": "420-480s",
+          "refId": "H",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"540.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"480.0\"}[24h]))",
+          "legendFormat": "480-540s",
+          "refId": "I",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"600.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"540.0\"}[24h]))",
+          "legendFormat": "540-600s",
+          "refId": "J",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "vertical",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      }
+    },
+    {
+      "type": "barchart",
+      "title": "Backend Response Time Histogram (last 24h)",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
+          "legendFormat": "0-60s",
+          "refId": "A",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"120.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
+          "legendFormat": "60-120s",
+          "refId": "B",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"180.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"120.0\"}[24h]))",
+          "legendFormat": "120-180s",
+          "refId": "C",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"240.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"180.0\"}[24h]))",
+          "legendFormat": "180-240s",
+          "refId": "D",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"300.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"240.0\"}[24h]))",
+          "legendFormat": "240-300s",
+          "refId": "E",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"360.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"300.0\"}[24h]))",
+          "legendFormat": "300-360s",
+          "refId": "F",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"420.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"360.0\"}[24h]))",
+          "legendFormat": "360-420s",
+          "refId": "G",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"480.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"420.0\"}[24h]))",
+          "legendFormat": "420-480s",
+          "refId": "H",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"540.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"480.0\"}[24h]))",
+          "legendFormat": "480-540s",
+          "refId": "I",
+          "instant": true
+        },
+        {
+          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"600.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"540.0\"}[24h]))",
+          "legendFormat": "540-600s",
+          "refId": "J",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "vertical",
+        "showValue": "auto",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      }
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "cookiemancer"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timezone": "",
+  "title": "Cookiemancer",
+  "version": 1
+}
