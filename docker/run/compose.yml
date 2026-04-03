@@ -1,11 +1,11 @@
 services:
   backend:
-    image: ebprihar/cookiemancer_backend:latest
-    container_name: cookiemancer_backend
+    image: dashllipsey/backend:latest
+    container_name: songbird_backend
     ports:
       - '22031:8000'
     networks:
-      - cookiemancer_net
+      - songbird_net
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
       interval: 10s
