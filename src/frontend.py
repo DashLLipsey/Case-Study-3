@@ -1,8 +1,23 @@
 import gradio as gr
 import requests
+import requests
+import prometheus_client
+from time import perf_counter
 
-LOCAL_URL = "http://localhost:9003"
-BASE_URL = "http://paffenroth-23.dyn.wpi.edu:9003"
+BACKEND_URL = 'https://backend:8000/'
+
+
+FRONTEND_CHAT_REQUESTS_TOTAL = prometheus_client.Counter(
+    'frontend_requests_total',
+    'Total number of requests',
+)
+FRONTEND_CHAT_REQUESTS_ERRORS_TOTAL = prometheus_client.Counter(
+    'frontend_requests_errors_total',
+    'Total number of errors',
+)
+FRONTEND_CHAT_REQUESTS_DURATION_SECONDS = prometheus_client.Histogram(
+    'frontend_requests_duration_seconds',
+)
 
 def respond(
         message,
@@ -14,6 +29,15 @@ def respond(
         use_local_model,
         hf_token=None
 ):
+    FRONTEND_CHAT_REQUESTS_TOTAL.inc()
+    started = perf_counter()
+    message = message.strip()
+
+    if not message:
+        FRONTEND_CHAT_REQUESTS_ERRORS_TOTAL.inc()
+        FRONTEND_CHAT_REQUESTS_DURATION_SECONDS.observe(perf_counter() - started)
+        return '<p>Please enter a message.</p>'
+
     payload = {
         "prompt": message,
         "system_message": sys_message,
@@ -27,38 +51,23 @@ def respond(
     try:
         # post to appropriate server (local always works during development)
         #url = LOCAL_URL if use_local_model else BASE_URL
-        url = BASE_URL
-        response = requests.post(f"{url}/generate", json=payload, timeout=60)
-        
-        try:
-            result = response.json()
-        except ValueError:
-            # backend may have crashed and returned non-JSON content
-            return (
-                f"Backend crashed or returned invalid response ({response.status_code}). "
-                f"Check the backend logs. Response: {response.text[:200]}"
-            )
 
-        if response.status_code != 200:
-            # attempt to retrieve error message from detail or response
-            detail = result.get("detail") or result.get("error") or str(result)
-            return f"Backend error ({response.status_code}): {detail}"
-
-        # normal path
+        response = requests.post(f"{BACKEND_URL}/generate", json=payload, timeout=60)
+        response.raise_for_status()
+        result = response.json()
         return result.get("response", f"No 'response' field returned: {result}")
-    except requests.exceptions.ConnectionError as e:
-        return (
-            f"Connection error: cannot reach backend at {url}. "
-            f"Make sure the backend is running on port 9003. Error: {str(e)[:100]}"
-        )
-    except requests.exceptions.Timeout:
-        return (
-            "Backend request timed out after 60 seconds. "
-            "The model may be slow or the backend is stuck."
-        )
-    except Exception as e:
-        return f"Error connecting to backend: {e}"
-    
+        
+    except requests.RequestException as exc:
+        FRONTEND_CHAT_REQUESTS_ERRORS_TOTAL.inc()
+        return f'<p>Backend request failed: {exc}</p>'
+
+    except ValueError:
+        FRONTEND_CHAT_REQUESTS_ERRORS_TOTAL.inc()
+        return "Backend returned invalid JSON."
+    finally:
+        FRONTEND_CHAT_REQUESTS_DURATION_SECONDS.observe(perf_counter() - started)
+
+prometheus_client.start_http_server(9090)
 chatbot = gr.ChatInterface(
     respond,
     additional_inputs=[
@@ -77,5 +86,4 @@ with gr.Blocks() as demo:
         gr.Markdown("<h1 style='text-align: center;'> 🎵 Song Generator Chatbot 🎵</h1>")
     chatbot.render()
 
-if __name__ == "__main__":
-    demo.launch(css='styles.css')
+demo.launch()
