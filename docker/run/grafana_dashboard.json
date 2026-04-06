@@ -81,61 +81,61 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
+          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
           "legendFormat": "0-60s",
           "refId": "A",
           "instant": true
         },
         {
-          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"120.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
+          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"120.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
           "legendFormat": "60-120s",
           "refId": "B",
           "instant": true
         },
         {
-          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"180.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"120.0\"}[24h]))",
+          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"180.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"120.0\"}[24h]))",
           "legendFormat": "120-180s",
           "refId": "C",
           "instant": true
         },
         {
-          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"240.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"180.0\"}[24h]))",
+          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"240.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"180.0\"}[24h]))",
           "legendFormat": "180-240s",
           "refId": "D",
           "instant": true
         },
         {
-          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"300.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"240.0\"}[24h]))",
+          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"300.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"240.0\"}[24h]))",
           "legendFormat": "240-300s",
           "refId": "E",
           "instant": true
         },
         {
-          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"360.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"300.0\"}[24h]))",
+          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"360.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"300.0\"}[24h]))",
           "legendFormat": "300-360s",
           "refId": "F",
           "instant": true
         },
         {
-          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"420.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"360.0\"}[24h]))",
+          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"420.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"360.0\"}[24h]))",
           "legendFormat": "360-420s",
           "refId": "G",
           "instant": true
         },
         {
-          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"480.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"420.0\"}[24h]))",
+          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"480.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"420.0\"}[24h]))",
           "legendFormat": "420-480s",
           "refId": "H",
           "instant": true
         },
         {
-          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"540.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"480.0\"}[24h]))",
+          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"540.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"480.0\"}[24h]))",
           "legendFormat": "480-540s",
           "refId": "I",
           "instant": true
         },
         {
-          "expr": "sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"600.0\"}[24h])) - sum(increase(frontend_recipe_request_duration_seconds_bucket{le=\"540.0\"}[24h]))",
+          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"600.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"540.0\"}[24h]))",
           "legendFormat": "540-600s",
           "refId": "J",
           "instant": true
@@ -173,61 +173,61 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
+          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
           "legendFormat": "0-60s",
           "refId": "A",
           "instant": true
         },
         {
-          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"120.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
+          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"120.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
           "legendFormat": "60-120s",
           "refId": "B",
           "instant": true
         },
         {
-          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"180.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"120.0\"}[24h]))",
+          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"180.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"120.0\"}[24h]))",
           "legendFormat": "120-180s",
           "refId": "C",
           "instant": true
         },
         {
-          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"240.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"180.0\"}[24h]))",
+          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"240.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"180.0\"}[24h]))",
           "legendFormat": "180-240s",
           "refId": "D",
           "instant": true
         },
         {
-          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"300.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"240.0\"}[24h]))",
+          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"300.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"240.0\"}[24h]))",
           "legendFormat": "240-300s",
           "refId": "E",
           "instant": true
         },
         {
-          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"360.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"300.0\"}[24h]))",
+          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"360.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"300.0\"}[24h]))",
           "legendFormat": "300-360s",
           "refId": "F",
           "instant": true
         },
         {
-          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"420.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"360.0\"}[24h]))",
+          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"420.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"360.0\"}[24h]))",
           "legendFormat": "360-420s",
           "refId": "G",
           "instant": true
         },
         {
-          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"480.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"420.0\"}[24h]))",
+          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"480.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"420.0\"}[24h]))",
           "legendFormat": "420-480s",
           "refId": "H",
           "instant": true
         },
         {
-          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"540.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"480.0\"}[24h]))",
+          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"540.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"480.0\"}[24h]))",
           "legendFormat": "480-540s",
           "refId": "I",
           "instant": true
         },
         {
-          "expr": "sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"600.0\"}[24h])) - sum(increase(backend_recipe_request_duration_seconds_bucket{le=\"540.0\"}[24h]))",
+          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"600.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"540.0\"}[24h]))",
           "legendFormat": "540-600s",
           "refId": "J",
           "instant": true
