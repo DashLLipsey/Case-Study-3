@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir fastapi uvicorn transformers accelerate bitsandby
 
 WORKDIR /app
 
-COPY src /src
+COPY src/backend.py /app/src/
 
 EXPOSE 8000
 
