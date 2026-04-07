@@ -243,7 +243,7 @@ def generate_endpoint(body: GenerateRequest):
     start = perf_counter()
 
     try:
-        song = generate(body.prompt)
+        song = generate(body)
         return GenerateResponse(
             response=song
         )
