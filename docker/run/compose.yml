@@ -25,7 +25,6 @@ services:
     networks:
       - songbird_net
     restart: unless-stopped
-
   ngrok:
     image: ngrok/ngrok:latest
     container_name: ngrok3
