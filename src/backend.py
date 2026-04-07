@@ -29,7 +29,7 @@ SONG_REQUEST_DURATION_SECONDS = prometheus_client.Histogram(
 
 # song app
 song_app = FastAPI(title="Songbird API")
-load_dotenv(dotenv_path="run/.env")
+
 # environment
 HF_TOKEN = os.getenv("HF_TOKEN")
 if HF_TOKEN is None:

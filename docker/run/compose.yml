@@ -1,6 +1,8 @@
 services:
   backend:
     image: dashlipsey/songbird_backend:latest
+    environment:
+      HF_TOKEN: ${HF_TOKEN}
     container_name: songbird_backend
     ports:
       - '22031:8000'
@@ -25,7 +27,7 @@ services:
     networks:
       - songbird_net
     restart: unless-stopped
-    
+
   ngrok:
     image: ngrok/ngrok:latest
     container_name: ngrok3
