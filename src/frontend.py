@@ -67,7 +67,7 @@ def respond(
     finally:
         FRONTEND_CHAT_REQUESTS_DURATION_SECONDS.observe(perf_counter() - started)
 
-prometheus_client.start_http_server(8080)
+prometheus_client.start_http_server(9090)
 chatbot = gr.ChatInterface(
     respond,
     additional_inputs=[
