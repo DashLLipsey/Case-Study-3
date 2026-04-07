@@ -1,10 +1,9 @@
 import gradio as gr
 import requests
-import requests
 import prometheus_client
 from time import perf_counter
 
-BACKEND_URL = 'https://backend:8000/'
+BACKEND_URL = 'http://backend:8000'
 
 
 FRONTEND_CHAT_REQUESTS_TOTAL = prometheus_client.Counter(
@@ -17,6 +16,7 @@ FRONTEND_CHAT_REQUESTS_ERRORS_TOTAL = prometheus_client.Counter(
 )
 FRONTEND_CHAT_REQUESTS_DURATION_SECONDS = prometheus_client.Histogram(
     'frontend_requests_duration_seconds',
+    'Duration of frontend chat requests in seconds'
 )
 
 def respond(
@@ -67,7 +67,7 @@ def respond(
     finally:
         FRONTEND_CHAT_REQUESTS_DURATION_SECONDS.observe(perf_counter() - started)
 
-prometheus_client.start_http_server(9090)
+prometheus_client.start_http_server(8080)
 chatbot = gr.ChatInterface(
     respond,
     additional_inputs=[
@@ -86,4 +86,4 @@ with gr.Blocks() as demo:
         gr.Markdown("<h1 style='text-align: center;'> 🎵 Song Generator Chatbot 🎵</h1>")
     chatbot.render()
 
-demo.launch()
+demo.launch(server_name="0.0.0.0")
