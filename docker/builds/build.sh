@@ -1,4 +1,4 @@
-docker build -t dashllipsey/songbird_backend:latest -f backend.dockerfile ../..
-docker build -t dashllipsey/songbird_frontend:latest -f frontend.dockerfile ../..
-docker push dashllipsey/songbird_backend:latest
-docker push dashllipsey/songbird_frontend:latest
+docker build -t group03/songbird_backend:latest -f backend.dockerfile ../..
+docker build -t group03/songbird_frontend:latest -f frontend.dockerfile ../..
+docker push group03/songbird_backend:latest
+docker push group03/songbird_frontend:latest

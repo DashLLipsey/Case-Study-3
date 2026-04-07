@@ -1,6 +1,6 @@
 services:
   backend:
-    image: dashllipsey/backend:latest
+    image: group03/songbird_backend:latest
     container_name: songbird_backend
     ports:
       - '22031:8000'
@@ -15,7 +15,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: dashllipsey/frontend:latest
+    image: group03/songbird_frontend:latest
     container_name: songbird_frontend
     depends_on:
       backend:
