@@ -52,7 +52,7 @@ def respond(
         # post to appropriate server (local always works during development)
         #url = LOCAL_URL if use_local_model else BASE_URL
 
-        response = requests.post(f"{BACKEND_URL}/generate", json=payload, timeout=60)
+        response = requests.post(f"{BACKEND_URL}/generate", json=payload, timeout=300)
         response.raise_for_status()
         result = response.json()
         return result.get("response", f"No 'response' field returned: {result}")
@@ -75,7 +75,7 @@ chatbot = gr.ChatInterface(
         " Your goal is to write lyrics that have a strong rhythm, clear structure, and creative rhymes.",
         label="System message"),
         gr.Slider(minimum=1, maximum=2048, value=512, step=1, label="Max new tokens"),
-        gr.Slider(minimum=0.1, maximum=4.0, value=0.7, step=0.1, label="Temperature"),
+        gr.Slider(minimum=0.1, maximum=2.0, value=0.7, step=0.1, label="Temperature"),
         gr.Slider(minimum=0.1, maximum=1.0, value=0.95, step=0.05, label="Top-p (nucleus sampling)"),
         gr.Checkbox(label="Use Local Model", value=False),
     ]
