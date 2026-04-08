@@ -15,7 +15,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (name) (rate(container_cpu_usage_seconds_total{name=~\"(frontend|backend)\"}[5m])) * 100",
+          "expr": "sum by (name) (rate(container_cpu_usage_seconds_total[5m])) * 100",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
@@ -48,14 +48,14 @@
       },
       "targets": [
         {
-          "expr": "sum by (name) (container_memory_working_set_bytes{name=~\"(frontend|backend)\"}) / 1024 / 1024",
+          "expr": "sum by (name) (container_memory_working_set_bytes) / 1024 / 1024",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "decmbytes",
+          "unit": "mebibytes",
           "min": 0
         },
         "overrides": []
@@ -71,6 +71,78 @@
       }
     },
     {
+      "type": "timeseries",
+      "title": "Frontend Total Requests",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 26 },
+      "targets": [
+        { "expr": "sum(frontend_requests_total) by (instance)", "legendFormat": "{{instance}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Frontend Request Errors",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 26 },
+      "targets": [
+        { "expr": "sum(frontend_requests_errors_total) by (instance)", "legendFormat": "{{instance}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Frontend Request Duration (s)",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 32 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(frontend_requests_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95", "refId": "A" },
+        { "expr": "sum(rate(frontend_requests_duration_seconds_sum[5m])) / sum(rate(frontend_requests_duration_seconds_count[5m]))", "legendFormat": "Avg", "refId": "B" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Backend Health Requests Total",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 38 },
+      "targets": [
+        { "expr": "sum(backend_health_requests_total) by (instance)", "legendFormat": "{{instance}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Backend Song Requests Total",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 38 },
+      "targets": [
+        { "expr": "sum(backend_song_requests_total) by (instance)", "legendFormat": "{{instance}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Backend Song Request Errors",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 44 },
+      "targets": [
+        { "expr": "sum(backend_song_request_errors_total) by (instance)", "legendFormat": "{{instance}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "none", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Backend Song Request Duration (s)",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 44 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(backend_song_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95", "refId": "A" },
+        { "expr": "sum(rate(backend_song_request_duration_seconds_sum[5m])) / sum(rate(backend_song_request_duration_seconds_count[5m]))", "legendFormat": "Avg", "refId": "B" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s", "min": 0 }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } }
+    },
+    {
       "type": "barchart",
       "title": "Frontend Response Time Histogram (last 24h)",
       "gridPos": {
@@ -81,64 +153,10 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
-          "legendFormat": "0-60s",
+          "expr": "frontend_requests_duration_seconds_bucket",
+          "legendFormat": "le={{le}}",
           "refId": "A",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"120.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
-          "legendFormat": "60-120s",
-          "refId": "B",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"180.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"120.0\"}[24h]))",
-          "legendFormat": "120-180s",
-          "refId": "C",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"240.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"180.0\"}[24h]))",
-          "legendFormat": "180-240s",
-          "refId": "D",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"300.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"240.0\"}[24h]))",
-          "legendFormat": "240-300s",
-          "refId": "E",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"360.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"300.0\"}[24h]))",
-          "legendFormat": "300-360s",
-          "refId": "F",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"420.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"360.0\"}[24h]))",
-          "legendFormat": "360-420s",
-          "refId": "G",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"480.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"420.0\"}[24h]))",
-          "legendFormat": "420-480s",
-          "refId": "H",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"540.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"480.0\"}[24h]))",
-          "legendFormat": "480-540s",
-          "refId": "I",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"600.0\"}[24h])) - sum(increase(frontend_chat_request_duration_seconds_bucket{le=\"540.0\"}[24h]))",
-          "legendFormat": "540-600s",
-          "refId": "J",
-          "instant": true
+          "instant": false
         }
       ],
       "fieldConfig": {
@@ -173,64 +191,10 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
-          "legendFormat": "0-60s",
+          "expr": "backend_song_request_duration_seconds_bucket",
+          "legendFormat": "le={{le}}",
           "refId": "A",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"120.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"60.0\"}[24h]))",
-          "legendFormat": "60-120s",
-          "refId": "B",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"180.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"120.0\"}[24h]))",
-          "legendFormat": "120-180s",
-          "refId": "C",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"240.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"180.0\"}[24h]))",
-          "legendFormat": "180-240s",
-          "refId": "D",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"300.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"240.0\"}[24h]))",
-          "legendFormat": "240-300s",
-          "refId": "E",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"360.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"300.0\"}[24h]))",
-          "legendFormat": "300-360s",
-          "refId": "F",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"420.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"360.0\"}[24h]))",
-          "legendFormat": "360-420s",
-          "refId": "G",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"480.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"420.0\"}[24h]))",
-          "legendFormat": "420-480s",
-          "refId": "H",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"540.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"480.0\"}[24h]))",
-          "legendFormat": "480-540s",
-          "refId": "I",
-          "instant": true
-        },
-        {
-          "expr": "sum(increase(backend_song_request_duration_seconds_bucket{le=\"600.0\"}[24h])) - sum(increase(backend_song_request_duration_seconds_bucket{le=\"540.0\"}[24h]))",
-          "legendFormat": "540-600s",
-          "refId": "J",
-          "instant": true
+          "instant": false
         }
       ],
       "fieldConfig": {
